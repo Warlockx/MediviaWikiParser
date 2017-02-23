@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MediviaWikiParser.Services;
@@ -10,9 +11,10 @@ namespace MediviaWikiParser
     {
         public static void Main(string[] args)
         {
-            MonstersService monsters = new MonstersService();
-            monsters.GetMonsters(false).Wait();
-
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(),"Images");
+            MonstersService monsters = new MonstersService(saveLocation);
+            monsters.GetMonsters(true).Wait();
+            Console.ReadKey();
         }
         
     }

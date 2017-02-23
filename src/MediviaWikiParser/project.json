@@ -5,6 +5,7 @@
   },
 
   "dependencies": {
+    "CoreCompat.System.Drawing": "1.0.0-beta006",
     "HtmlAgilityPack.NetCore": "1.5.0.1",
     "Microsoft.NETCore.App": {
       "type": "platform",

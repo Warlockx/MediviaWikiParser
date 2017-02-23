@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace MediviaWikiParser.Models
 {
-    public class Monster
+    public class Creature
     {
         public string ImageUrl { get; }
         public string Name { get; }
         public int Experience { get;}
         public int Hitpoints { get; }
 
-        public Monster(string imageUrl, string name, int experience, int hitpoints)
+        public Creature(string imageUrl, string name, int experience, int hitpoints)
         {
             ImageUrl = imageUrl;
             Name = name;

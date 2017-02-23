@@ -13,7 +13,7 @@ namespace MediviaWikiParser
         {
             string saveLocation = Path.Combine(Directory.GetCurrentDirectory(),"Images");
             MonstersService monsters = new MonstersService(saveLocation);
-            monsters.GetMonsters(true).Wait();
+            monsters.GetMonsters(false,true).Wait();
             Console.ReadKey();
         }
         

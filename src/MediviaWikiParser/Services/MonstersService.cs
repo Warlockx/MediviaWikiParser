@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Dynamic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace MediviaWikiParser.Services
         }
 
      
-        public async Task<IEnumerable<Creature>> GetMonsters(bool savePictures)
+        public async Task<IEnumerable<Creature>> GetMonsters(bool savePictures,bool getDetails)
         {
             List<Creature> creatures = new List<Creature>();
             HttpResponseMessage response = await _httpClient.GetAsync("/Monsters");
@@ -42,14 +43,10 @@ namespace MediviaWikiParser.Services
 
             HtmlNodeCollection creatureRows = document.DocumentNode.SelectNodes("//table[@class='wiki_table']/tr");
 
-            foreach (HtmlNode creatureNode in creatureRows)
-            {
-                if(creatureNode.InnerHtml.Contains("Experience")) continue;
+            GetSimpleInfo(ref creatures,creatureRows);
 
-                Creature monster = ParseRow(creatureNode);
-                if (monster != null)
-                    creatures.Add(monster);
-            }
+            if (getDetails)
+               await GetDetailedInfo(creatures);
 
             if (!savePictures) return creatures;
 
@@ -60,6 +57,37 @@ namespace MediviaWikiParser.Services
                 await SaveImage(creature);
 
             return creatures;
+        }
+
+        private async Task<IEnumerable<Creature>> GetDetailedInfo(IEnumerable<Creature> oldCreatures)
+        {
+            List<Creature> creatures = new List<Creature>(oldCreatures);
+            for (int i = 0; i < creatures.Count; i++)
+            {
+                Creature creature = creatures[i];
+                HttpResponseMessage response = await _httpClient.GetAsync($"/{creature.Name}");
+
+                if (!response.IsSuccessStatusCode) continue;
+
+                string html = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(html)) continue;
+
+               /* creatures[i] =*/ ParseDetailPage(creature, html);
+            }
+            return creatures;
+        }
+
+        private static void GetSimpleInfo(ref List<Creature> creatures,HtmlNodeCollection creatureRows)
+        {
+            foreach (HtmlNode creatureNode in creatureRows)
+            {
+                if (creatureNode.InnerHtml.Contains("Experience")) continue;
+
+                Creature monster = ParseRow(creatureNode);
+                if (monster != null)
+                    creatures.Add(monster);
+            }
         }
 
         private static Creature ParseRow(HtmlNode node)
@@ -82,6 +110,16 @@ namespace MediviaWikiParser.Services
             int.TryParse(creatureCells[3].InnerText, out creatureHitpoints);
             
            return new Creature(pictureUrl,creatureName,creatureExperience,creatureHitpoints);
+        }
+
+        private static void ParseDetailPage(Creature creature,string html)
+        {
+            HtmlDocument document = new HtmlDocument();
+            document.LoadHtml(html);
+
+            HtmlNode informationContainer = document.DocumentNode.SelectSingleNode("//div[@class='wiki wikiPage'");
+
+            Console.WriteLine();
         }
 
         private async Task SaveImage(Creature creature)

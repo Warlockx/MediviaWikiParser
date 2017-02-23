@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediviaWikiParser.Services;
 
 namespace MediviaWikiParser
 {
@@ -9,6 +10,10 @@ namespace MediviaWikiParser
     {
         public static void Main(string[] args)
         {
+            MonstersService monsters = new MonstersService();
+            monsters.GetMonsters(false).Wait();
+
         }
+        
     }
 }

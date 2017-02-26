@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MediviaWikiParser.Models;
 using MediviaWikiParser.Services;
 
 namespace MediviaWikiParser
@@ -11,11 +12,22 @@ namespace MediviaWikiParser
     {
         public static void Main(string[] args)
         {
-            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(),"Images");
+            Run().Wait(); 
+        }
+
+        private static async Task Run()
+        {
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Images");
             MonstersService monsters = new MonstersService(saveLocation);
-            monsters.GetMonsters(false,true).Wait();
+            try
+            {
+                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             Console.ReadKey();
         }
-        
     }
 }

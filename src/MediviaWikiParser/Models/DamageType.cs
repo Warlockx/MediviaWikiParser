@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 
 namespace MediviaWikiParser.Models
 {
-    public class Abilities
+    public enum DamageType
     {
-        public string Name { get; }
-        public int MinRange { get; }
-        public int MaxRange { get; }
+        Fire,
+        Energy,
+        Poison,
+        LifeDrain,
+        Physical,
+        Death,
+        Invisibility
     }
 }

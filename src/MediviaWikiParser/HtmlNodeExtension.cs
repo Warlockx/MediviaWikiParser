@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
-namespace MediviaWikiParser.Models
+namespace MediviaWikiParser
 {
-    public enum Elements
+    public static class HtmlNodeExtension
     {
-        Fire,
-        Energy,
-        Poison
+      
     }
 }

@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 
 namespace MediviaWikiParser.Models
 {
-    public enum DamageTypes
+    public enum Element
     {
         Fire,
         Energy,
-        Poison,
-        LifeDrain,
-        Physical
+        Poison
     }
 }

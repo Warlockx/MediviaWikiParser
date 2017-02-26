@@ -15,10 +15,10 @@ namespace MediviaWikiParser.Models
         public int ConvinceCost { get; }
         public bool Pushable { get; }
         public bool CanPushObjects { get; }
-        public IEnumerable<Elements> CanWalkOn { get; }
-        public int MaxDamagePerTurn { get; }
-        public IEnumerable<DamageTypes> Immunities { get; }
-        public IEnumerable<DamageTypes> NeutralTo { get; }
+        public IEnumerable<Element> CanWalkOn { get; }
+        public int DamagePerTurn { get; }
+        public IEnumerable<DamageType> Immunities { get; }
+        public IEnumerable<DamageType> NeutralTo { get; }
         public IEnumerable<string> Sounds { get; }
         public TaskInfo Task { get; }
         public string Notes { get; }
@@ -26,7 +26,7 @@ namespace MediviaWikiParser.Models
         public string Strategy { get; }
         public IEnumerable<Loot> Loot { get; }
         
-        public Creature(string imageUrl, string name, int experience, int hitpoints, int summonCost, int convinceCost, bool pushable, bool canPushObjects, IEnumerable<Elements> canWalkOn, int maxDamagePerTurn, IEnumerable<DamageTypes> immunities, IEnumerable<DamageTypes> neutralTo, IEnumerable<string> sounds, TaskInfo task, string notes, IEnumerable<string> whereToFind, string strategy, IEnumerable<Loot> loot)
+        public Creature(string imageUrl, string name, int experience, int hitpoints, int summonCost, int convinceCost, bool pushable, bool canPushObjects, IEnumerable<Element> canWalkOn, int maxDamagePerTurn, IEnumerable<DamageType> immunities, IEnumerable<DamageType> neutralTo, IEnumerable<string> sounds, TaskInfo task, string notes, IEnumerable<string> whereToFind, string strategy, IEnumerable<Loot> loot)
         {
             ImageUrl = imageUrl;
             Name = name;
@@ -37,7 +37,7 @@ namespace MediviaWikiParser.Models
             Pushable = pushable;
             CanPushObjects = canPushObjects;
             CanWalkOn = canWalkOn;
-            MaxDamagePerTurn = maxDamagePerTurn;
+            DamagePerTurn = maxDamagePerTurn;
             Immunities = immunities;
             NeutralTo = neutralTo;
             Sounds = sounds;

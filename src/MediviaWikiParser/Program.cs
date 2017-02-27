@@ -11,38 +11,54 @@ namespace MediviaWikiParser
 {
     public class Program
     {
+
         public static void Main(string[] args)
         {
-            Run().Wait(); 
+           // GetMonsters().Wait(); 
+            GetSpells().Wait();
+            Console.ReadKey();
         }
 
-        private static async Task Run()
+        private static async Task GetSpells()
         {
-            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Images");
-            MonstersService monsters = new MonstersService(saveLocation);
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Spells");
+            SpellsService spellService = new SpellsService(saveLocation);
             try
             {
-                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
-
-                Console.WriteLine("Converting into json.");
-                //transform into json
-                string json = JsonConvert.SerializeObject(creatures, Formatting.Indented);
-
-                //save
-                string currentDirectory = Directory.GetCurrentDirectory();
-                if (!Directory.Exists(currentDirectory + "/json"))
-                    Directory.CreateDirectory(currentDirectory + "/json");
-
-                Console.WriteLine($"Saving to file at {currentDirectory}/json/monsters.json");
-                File.WriteAllText($"{currentDirectory}/json/monsters.json", json);
-
-                Console.WriteLine("Finished.");
+                IEnumerable<Spell> spells = await spellService.GetSpells();
+                SaveJson(spells, saveLocation, "spells");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            Console.ReadKey();
+
+        }
+        private static async Task GetMonsters()
+        {
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Monsters");
+            MonstersService monsters = new MonstersService(saveLocation);
+            try
+            {
+                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
+
+                SaveJson(creatures,saveLocation,"monsters");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static void SaveJson(object deserializedObject, string saveLocation, string fileName)
+        {
+
+            string json = JsonConvert.SerializeObject(deserializedObject, Formatting.Indented);
+
+            if (!Directory.Exists(saveLocation))
+                Directory.CreateDirectory(saveLocation);
+           
+            File.WriteAllText(Path.Combine(saveLocation, fileName + ".json"), json);
         }
     }
 }

@@ -69,7 +69,7 @@ namespace MediviaWikiParser.Services
             for (int i = 0; i < creatures.Count; i++)
             {
 #if DEBUG
-                Console.WriteLine($"Monsters: Getting detailed info from creature {i}/{creatures.Count}.");
+                Console.WriteLine($"Monsters: Getting detailed info from creature {i}/{creatures.Count-1}.");
 #endif
                 Creature creature = creatures[i];
                 HttpResponseMessage response = await _httpClient.GetAsync($"/{creature.Name}");

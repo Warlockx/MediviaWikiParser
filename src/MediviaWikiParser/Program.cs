@@ -14,19 +14,35 @@ namespace MediviaWikiParser
 
         public static void Main(string[] args)
         {
-           // GetMonsters().Wait(); 
-            GetSpells().Wait();
+            // GetMonsters().Wait(); 
+             GetSpells().Wait();
+            //GetRunes().Wait();
             Console.ReadKey();
         }
 
         private static async Task GetSpells()
         {
             string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Spells");
-            SpellsService spellService = new SpellsService(saveLocation);
+            SpellsService spellService = new SpellsService();
             try
             {
                 IEnumerable<Spell> spells = await spellService.GetSpells();
                 SaveJson(spells, saveLocation, "spells");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+        private static async Task GetRunes()
+        {
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Spells");
+            RunesService runeService = new RunesService();
+            try
+            {
+                IEnumerable<Rune> spells = await runeService.GetRunes();
+                SaveJson(spells, saveLocation, "runes");
             }
             catch (Exception ex)
             {

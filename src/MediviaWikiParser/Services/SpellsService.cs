@@ -13,14 +13,13 @@ namespace MediviaWikiParser.Services
 {
     public class SpellsService
     {
-        private readonly string _saveLocation;
+     
         private readonly HttpClient _httpClient;
 
-        public SpellsService(string saveLocation)
+        public SpellsService()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://medivia.wikispaces.com");
-            _saveLocation = saveLocation;
         }
 
         public async Task<IEnumerable<Spell>> GetSpells()
@@ -55,7 +54,7 @@ namespace MediviaWikiParser.Services
 
                 int castMagicLevel = ParseNumberValue(spellCells[1].InnerText.TrimEnd('\n'));
                 int useMagicLevel =  ParseNumberValue(spellCells[2].InnerText.TrimEnd('\n'));
-                string formula = spellCells[3].InnerText.TrimEnd('\n');
+                string formula = WebUtility.HtmlDecode(spellCells[3].InnerText.TrimEnd('\n'));
                 string name = spellCells[4].InnerText.TrimEnd('\n');
                 int manaCost = ParseNumberValue(spellCells[5].InnerText.TrimEnd('\n'));
                 IEnumerable<string> vocationsToCast = spellCells[6].InnerText

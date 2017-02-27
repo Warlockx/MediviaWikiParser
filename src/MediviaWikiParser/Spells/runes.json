@@ -1,0 +1,361 @@
+[
+  {
+    "Name": "Light Magic Missile",
+    "Formula": "adori",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid",
+      "Paladin"
+    ],
+    "CastMagicLevel": 1,
+    "UseMagicLevel": 0,
+    "ManaCost": 40,
+    "Charges": 10,
+    "Price": 10,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Poison Field",
+    "Formula": "adevo grav pox",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 2,
+    "UseMagicLevel": 0,
+    "ManaCost": 50,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Fire Field",
+    "Formula": "adevo grav flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 3,
+    "UseMagicLevel": 1,
+    "ManaCost": 60,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Heavy Magic Missile",
+    "Formula": "adori gran",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid",
+      "Paladin"
+    ],
+    "CastMagicLevel": 3,
+    "UseMagicLevel": 1,
+    "ManaCost": 60,
+    "Charges": 5,
+    "Price": 5,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Intense Healing Rune",
+    "Formula": "adura gran",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 4,
+    "UseMagicLevel": 1,
+    "ManaCost": 60,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Antidote Rune",
+    "Formula": "adana pox",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 5,
+    "UseMagicLevel": 0,
+    "ManaCost": 50,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Fireball",
+    "Formula": "adori flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid",
+      "Paladin"
+    ],
+    "CastMagicLevel": 5,
+    "UseMagicLevel": 2,
+    "ManaCost": 60,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Energy Field",
+    "Formula": "adevo grav vis",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 5,
+    "UseMagicLevel": 3,
+    "ManaCost": 80,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Destroy Field",
+    "Formula": "adito grav",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid",
+      "Paladin"
+    ],
+    "CastMagicLevel": 6,
+    "UseMagicLevel": 3,
+    "ManaCost": 60,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Animate Dead",
+    "Formula": "adana mort",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 7,
+    "UseMagicLevel": 4,
+    "ManaCost": 300,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Desintegrate",
+    "Formula": "adito tera",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid",
+      "Paladin"
+    ],
+    "CastMagicLevel": 8,
+    "UseMagicLevel": 4,
+    "ManaCost": 100,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Poison Bomb",
+    "Formula": "adevo mas pox",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 8,
+    "UseMagicLevel": 4,
+    "ManaCost": 130,
+    "Charges": 2,
+    "Price": 2,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Fire Bomb",
+    "Formula": "adevo mas flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 9,
+    "UseMagicLevel": 5,
+    "ManaCost": 150,
+    "Charges": 2,
+    "Price": 2,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Great Fireball",
+    "Formula": "adori gran flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 9,
+    "UseMagicLevel": 4,
+    "ManaCost": 135,
+    "Charges": 2,
+    "Price": 2,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Convince Creature",
+    "Formula": "adeta sio",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 10,
+    "UseMagicLevel": 5,
+    "ManaCost": 100,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Ultimate Healing Rune",
+    "Formula": "adura vita",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 11,
+    "UseMagicLevel": 4,
+    "ManaCost": 100,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Chameleon",
+    "Formula": "adevo ina",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 11,
+    "UseMagicLevel": 4,
+    "ManaCost": 150,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Poison Wall",
+    "Formula": "adevo mas grav pox",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 11,
+    "UseMagicLevel": 5,
+    "ManaCost": 160,
+    "Charges": 4,
+    "Price": 4,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Explosion",
+    "Formula": "adevo mas hur",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 12,
+    "UseMagicLevel": 6,
+    "ManaCost": 180,
+    "Charges": 3,
+    "Price": 3,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Soulfire",
+    "Formula": "adevo res flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 13,
+    "UseMagicLevel": 7,
+    "ManaCost": 150,
+    "Charges": 2,
+    "Price": 2,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Magic Wall",
+    "Formula": "adevo grav tera",
+    "VocationToCast": [
+      "Sorcerer"
+    ],
+    "CastMagicLevel": 14,
+    "UseMagicLevel": 9,
+    "ManaCost": 250,
+    "Charges": 4,
+    "Price": 4,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Energy Bomb",
+    "Formula": "adevo mas vis",
+    "VocationToCast": [
+      "Sorcerer"
+    ],
+    "CastMagicLevel": 18,
+    "UseMagicLevel": 10,
+    "ManaCost": 220,
+    "Charges": 2,
+    "Price": 2,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Energy Wall",
+    "Formula": "adevo mas grav vis",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 18,
+    "UseMagicLevel": 9,
+    "ManaCost": 250,
+    "Charges": 4,
+    "Price": 4,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Sudden Death Rune",
+    "Formula": "adori vita vis",
+    "VocationToCast": [
+      "Sorcerer"
+    ],
+    "CastMagicLevel": 25,
+    "UseMagicLevel": 15,
+    "ManaCost": 220,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Fire Wall",
+    "Formula": "adevo mas grav flam",
+    "VocationToCast": [
+      "Sorcerer",
+      "Druid"
+    ],
+    "CastMagicLevel": 33,
+    "UseMagicLevel": 6,
+    "ManaCost": 200,
+    "Charges": 4,
+    "Price": 4,
+    "NeedsPremium": false
+  },
+  {
+    "Name": "Paralyze",
+    "Formula": "adana ani",
+    "VocationToCast": [
+      "Druid"
+    ],
+    "CastMagicLevel": 35,
+    "UseMagicLevel": 18,
+    "ManaCost": 900,
+    "Charges": 1,
+    "Price": 1,
+    "NeedsPremium": false
+  }
+]

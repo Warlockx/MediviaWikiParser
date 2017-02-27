@@ -13,7 +13,7 @@
   },
   {
     "Name": "Find Person",
-    "Formula": "exiva &quot;",
+    "Formula": "exiva \"",
     "VocationToCast": [
       "All"
     ],
@@ -74,7 +74,7 @@
   },
   {
     "Name": "Levitate",
-    "Formula": "exani hur &quot;",
+    "Formula": "exani hur \"",
     "VocationToCast": [
       "All"
     ],
@@ -253,7 +253,7 @@
   },
   {
     "Name": "Light Heal Friend",
-    "Formula": "exana sio &quot;name",
+    "Formula": "exana sio \"name",
     "VocationToCast": [
       "Druid"
     ],
@@ -429,7 +429,7 @@
   },
   {
     "Name": "Heal Friend",
-    "Formula": "exura sio &quot;",
+    "Formula": "exura sio \"",
     "VocationToCast": [
       "Druid"
     ],
@@ -580,7 +580,7 @@
   },
   {
     "Name": "Creature Illusion",
-    "Formula": "utevo res ina &quot;",
+    "Formula": "utevo res ina \"",
     "VocationToCast": [
       "Sorcerer",
       "Druid"
@@ -781,7 +781,7 @@
   },
   {
     "Name": "Summon Creature",
-    "Formula": "utevo res &quot;",
+    "Formula": "utevo res \"",
     "VocationToCast": [
       "Sorcerer",
       "Druid"

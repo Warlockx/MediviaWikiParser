@@ -8,14 +8,34 @@ namespace MediviaWikiParser.Models
     public class Loot
     {
         public string Name { get;}
-        public int DropAmount { get; }
+        public int MinDropAmount { get; }
+        public int MaxDropAmount { get; }
         public string Rarity { get; }
 
-        public Loot(string name, int dropAmount, string rarity)
+        public Loot(string name, int minDropAmount, int maxDropAmount, string rarity)
         {
             Name = name;
-            DropAmount = dropAmount;
+            MinDropAmount = minDropAmount;
+            MaxDropAmount = maxDropAmount;
             Rarity = rarity;
+        }
+
+        public Loot(string name, int minDropAmount, int maxDropAmount)
+        {
+            Name = name;
+            MinDropAmount = minDropAmount;
+            MaxDropAmount = maxDropAmount;
+        }
+
+        public Loot(string name, string rarity)
+        {
+            Name = name;
+            Rarity = rarity;
+        }
+
+        public Loot(string name)
+        {
+            Name = name;
         }
     }
 }

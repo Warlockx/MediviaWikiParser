@@ -18,8 +18,8 @@ namespace MediviaWikiParser.Services
 {
     public class MonstersService
     {
-        private string _saveLocation;
-        private HttpClient _httpClient;
+        private readonly string _saveLocation;
+        private readonly HttpClient _httpClient;
 
         public MonstersService(string saveLocation)
         {
@@ -44,7 +44,9 @@ namespace MediviaWikiParser.Services
             document.LoadHtml(html);
 
             HtmlNodeCollection creatureRows = document.DocumentNode.SelectNodes("//table[@class='wiki_table']/tr");
-
+#if DEBUG
+            Console.WriteLine("Monsters: Getting simple info.");
+#endif
             GetSimpleInfo(ref creatures,creatureRows);
 
             if (getDetails)
@@ -66,6 +68,9 @@ namespace MediviaWikiParser.Services
             List<Creature> creatures = new List<Creature>(oldCreatures);
             for (int i = 0; i < creatures.Count; i++)
             {
+#if DEBUG
+                Console.WriteLine($"Monsters: Getting detailed info from creature {i}/{creatures.Count}.");
+#endif
                 Creature creature = creatures[i];
                 HttpResponseMessage response = await _httpClient.GetAsync($"/{creature.Name}");
 
@@ -75,7 +80,7 @@ namespace MediviaWikiParser.Services
 
                 if (string.IsNullOrEmpty(html)) continue;
 
-               /* creatures[i] =*/ ParseDetailPage(creature, html);
+                creatures[i] = ParseDetailPage(creature, html);
             }
             return creatures;
         }
@@ -114,66 +119,170 @@ namespace MediviaWikiParser.Services
            return new Creature(pictureUrl,creatureName,creatureExperience,creatureHitpoints);
         }
 
-        private static void ParseDetailPage(Creature creature,string html)
+        private static Creature ParseDetailPage(Creature creature, string html)
         {
-           
+
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(html);
 
             HtmlNode informationContainer = document.DocumentNode.SelectSingleNode("//div[@class='wiki wikiPage']");
             string[] information = informationContainer.InnerText.Split('\n');
 
-            Tuple<int, int> summonInfo = ParseSummonInfo(information.FirstOrDefault(s=>s.Contains("Summon/Convince:")));
-            IEnumerable<Ability> abilities = ParseAbilities(information.FirstOrDefault(s => s.Contains("Abilities:")));
-            bool? pushable = information.FirstOrDefault(s => s.Contains("Pushable:"))?.Contains("Tick.jpg");
+            Tuple<int, int> summonInfo = ParseSummonInfo(information.FirstOrDefault(s => s.Contains("Summon/Convince")));
+            IEnumerable<Ability> abilities = ParseAbilities(information.FirstOrDefault(s => s.Contains("Abilities")));
+            bool? pushable = information.FirstOrDefault(s => s.Contains("Pushable"))?.Contains("Tick.jpg");
             bool? pushObjects = information.FirstOrDefault(s => s.Contains("Push Objects"))?.Contains("Tick.jpg");
-            IEnumerable<Element> walksOn = ParseWalksOn(information.FirstOrDefault(s => s.Contains("Walks around:")));
-            int damagePerTurn = ParseDamage(information.FirstOrDefault(s => s.Contains("Est. Max. Damage:")));
-            IEnumerable<DamageType> immunities = ParseImmunities(information.FirstOrDefault(s => s.Contains("Immune")));
-            Console.WriteLine(creature.Name);
+            IEnumerable<Element> walksOn = ParseWalksOn(information.FirstOrDefault(s => s.Contains("Walks around")));
+            int damagePerTurn = ParseDamage(information.FirstOrDefault(s => s.Contains("Est. Max. Damage")));
+            IEnumerable<DamageType> immunities = ParseDamageTypes(information.FirstOrDefault(s => s.Contains("Immune")));
+            IEnumerable<DamageType> neutralities =
+                ParseDamageTypes(information.FirstOrDefault(s => s.Contains("Neutral")));
+            IEnumerable<string> sounds = ParseSounds(information.FirstOrDefault(s => s.Contains("Sounds")));
+            string strategy = ParseSimpleField(information.FirstOrDefault(s => s.Contains("Strategy")));
+            IEnumerable<string> whereToFind = ParseLocation(information.FirstOrDefault(s => s.Contains("Location")));
+            IEnumerable<Loot> loots = ParseLoot(information.FirstOrDefault(s => s.Contains("Loot")));
+           
+            creature.SummonCost = summonInfo.Item1;
+            creature.ConvinceCost = summonInfo.Item2;
+            creature.Abilities = abilities;
+            if (pushable != null) creature.Pushable = pushable.Value;
+            if (pushObjects != null) creature.CanPushObjects = pushObjects.Value;
+            creature.CanWalkOn = walksOn;
+            creature.DamagePerTurn = damagePerTurn;
+            creature.Immunities = immunities;
+            creature.NeutralTo = neutralities;
+            creature.Sounds = sounds;
+            creature.Strategy = strategy;
+            creature.WhereToFind = whereToFind;
+            creature.Loot = loots;
+            return creature;
         }
 
-        private static IEnumerable<DamageType> ParseImmunities(string immunitiesString)
+        private static IEnumerable<Loot> ParseLoot(string lootStrings)
         {
-            List<DamageType> immunities = new List<DamageType>();
-            if (string.IsNullOrEmpty(immunitiesString) || immunitiesString.Contains("None")) return immunities;
-            immunitiesString = immunitiesString.Substring(immunitiesString.IndexOf(':')+1); 
-
-            string[] immunityStrings = immunitiesString.Split(',');
-            foreach (string immunityString in immunityStrings)
+            if (string.IsNullOrEmpty(lootStrings) || lootStrings.Contains("Nothing")) return null;
+            IEnumerable<string> lootSplit = lootStrings.Replace(".","")
+                                                       .Replace("gp","Gold Coin")
+                                                       .Substring(lootStrings.IndexOf(':') + 1)
+                                                       .Split(',')
+                                                       .Select(s => s.TrimStart());
+            List<Loot> loots = new List<Loot>();
+            foreach (string loot in lootSplit)
             {
-                object damageType = immunityString.GetEnum<DamageType>();
-                if (damageType != null)
-                    immunities.Add((DamageType)damageType);
+                List<string> lootDetails = Regex.Split(loot, @"[-](?=\d{1,3}|[?])|(\d{1,3}|[?])\s(?=\w)|[(|)]").Where(s=> !string.IsNullOrEmpty(s)).ToList();
+              
+                switch (lootDetails.Count)
+                {
+                    case 1:
+                    {
+                        if (loot.Length > 2)
+                            loots.Add(new Loot(loot.TrimEnd()));
+                        break;
+                    }
+                    case 2:
+                    {
+                        if(lootDetails[0].Length > 2)
+                        loots.Add(new Loot(lootDetails[0].Trim(), lootDetails[1].Replace("-", "")));
+                        break;
+                    }
+                    case 3:
+                    {
+                        if (lootDetails[2].Length > 2)
+                        {
+                            int minDropQuantity, maxDropQuantity;
+                            int.TryParse(lootDetails[0], out minDropQuantity);
+                            int.TryParse(lootDetails[1], out maxDropQuantity);
+                            loots.Add(new Loot(lootDetails[2].Trim(),minDropQuantity, maxDropQuantity));
+                        }
+                        break;
+                    }
+                    case 4:
+                    {
+                        if (lootDetails[2].Length > 2)
+                        {
+                            int minDropQuantity, maxDropQuantity;
+                            int.TryParse(lootDetails[0], out minDropQuantity);
+                            int.TryParse(lootDetails[1], out maxDropQuantity);
+                            loots.Add(new Loot(lootDetails[2].Trim(),
+                               minDropQuantity, maxDropQuantity, lootDetails[3].Replace("-", "")));
+                        }
+                        break;
+                    }
+                }
             }
-            return immunities;
+            return loots;
+        }
+
+        private static IEnumerable<string> ParseLocation(string locationStrings)
+        {
+            return string.IsNullOrEmpty(locationStrings) ? null 
+                            : locationStrings
+                            .Substring(locationStrings.IndexOf(':') + 1)
+                            .Split(',')
+                            .Select(l => l.TrimStart())
+                            .Where(s=> !string.IsNullOrEmpty(s));
+        }
+       
+        private static string ParseSimpleField(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return "None";
+            int index = str.IndexOf(':') +1;
+            return str.Length > index ? str.Substring(index).TrimStart() : "None";
+        }
+
+        private static IEnumerable<string> ParseSounds(string soundsString)
+        {
+            if (string.IsNullOrEmpty(soundsString)) return null;
+            soundsString = soundsString.Substring(soundsString.IndexOf(':') + 1).TrimStart();
+            if (soundsString.StartsWith("None")) return null;
+
+            List<string> sounds = new List<string>();
+            soundsString = WebUtility.HtmlDecode(soundsString).Replace("\"", "");
+            string[] soundStrings = soundsString.Split(';');
+            sounds.AddRange(soundStrings.Select(sound => sound.TrimStart()).Where(s => !string.IsNullOrEmpty(s) && s.Length > 1));
+            return sounds;
+        }
+
+        private static IEnumerable<DamageType> ParseDamageTypes(string damageTypesString)
+        {
+            if (string.IsNullOrEmpty(damageTypesString) || damageTypesString.Contains("None")) return null;
+            return damageTypesString.Substring(damageTypesString.IndexOf(':') + 1)
+                                    .TrimStart()
+                                    .Split(',')
+                                    .Select(immunityString => immunityString.GetEnum<DamageType>())
+                                    .Where(damageType => damageType != null)
+                                    .Cast<DamageType>()
+                                    .ToList();
         }
 
         private static IEnumerable<Ability> ParseAbilities(string abilityNode)
         {
+            if (string.IsNullOrEmpty(abilityNode) || abilityNode.Contains("None")) return null;
             List<Ability> abilityList = new List<Ability>();
-            if (string.IsNullOrEmpty(abilityNode) || abilityNode.Contains("None")) return abilityList;
-            abilityNode = abilityNode.Replace("Abilities:","");
+            abilityNode = abilityNode.Substring(abilityNode.IndexOf(':') + 1)
+                                     .Replace(".", "")
+                                     .Replace(":", "");
 
-            IEnumerable<string> abilityStrings = Regex.Split(abilityNode.Replace(".", "").Replace(":", ""), @"[)],|, (?=[A-Z])|[)] (?=[A-Z])|; (?=[A-Z])").Where(string.IsNullOrWhiteSpace);
+            string[] abilityStrings = Regex.Split(abilityNode, @"[)],|[,|)|;] (?=[A-Z])");
 
             foreach (string abilityString in abilityStrings)
             {
-                if (!abilityString.Contains('-'))
-                    abilityList.Add(new Ability(abilityString.Trim()));
+                if (string.IsNullOrEmpty(abilityString)) continue;
+
+                string ability = abilityString.Trim();
+                if (!ability.Contains('-'))
+                    abilityList.Add(new Ability(ability));
                 else
                 {
-                    string[] abilityWithRange = abilityString
+                    string[] abilityWithRange = ability
                         .Replace(")", "").Replace("?","")
                         .Split(new[] {"(","-"}, StringSplitOptions.RemoveEmptyEntries);
 
                     if (abilityWithRange.Length < 3)
                     {
-                        abilityList.Add(new Ability(abilityString));
+                        abilityList.Add(new Ability(ability));
                         continue;
                     }
-                      
-
                     int minRange;
                     int maxRange;
                     int.TryParse(abilityWithRange[1], out minRange);
@@ -188,14 +297,16 @@ namespace MediviaWikiParser.Services
         private static Tuple<int, int> ParseSummonInfo(string summonNode)
         {
             if (string.IsNullOrEmpty(summonNode)) return new Tuple<int, int>(0,0);
-            //Summon/Convince: 220/220 (Illusionable)
-            summonNode = summonNode.Replace("Summon/Convince:","").Replace(" (Illusionable)","");
-            string[] splitValue = summonNode?.Split('/');
+       
+            string[] splitValue = summonNode.Substring(summonNode.IndexOf(':') + 1)
+                                            .Replace(" (Illusionable)", "")
+                                            .Split('/'); 
+
             if (splitValue.Length < 2) return new Tuple<int, int>(0, 0);
             int summonCost;
             int convinceCost;
-            int.TryParse(splitValue?[0], out summonCost);
-            int.TryParse(splitValue?[1], out convinceCost);
+            int.TryParse(splitValue[0], out summonCost);
+            int.TryParse(splitValue[1], out convinceCost);
             return new Tuple<int, int>(summonCost,convinceCost);
         }
 
@@ -203,22 +314,19 @@ namespace MediviaWikiParser.Services
         {
             List<Element> elements = new List<Element>();
             if (string.IsNullOrEmpty(walksOnNode)) return elements;
-            walksOnNode = walksOnNode.Replace("Walks around:","");
-         
-            string[] elementStrings = walksOnNode.Split(',');
-            foreach (string element in elementStrings)
-            {
-                object ele = element.GetEnum<Element>();
-                if (ele != null)
-                    elements.Add((Element)ele);
-            }
+
+            string[] elementStrings = walksOnNode.Substring(walksOnNode.IndexOf(':') + 1).Split(',');
+            elements
+                .AddRange(elementStrings
+                .Select(element => element.GetEnum<Element>())
+                .Where(ele => ele != null).Cast<Element>());
             return elements;
         }
 
         private static int ParseDamage(string damageNode)
         {
             if (string.IsNullOrEmpty(damageNode)) return 0;
-            damageNode = damageNode.Replace("Est. Max. Damage:","").Replace("hp per turn","");
+            damageNode = damageNode.Substring(damageNode.IndexOf(':') + 1).Replace("hp per turn","");
             int value;
             int.TryParse(damageNode, out value);
             return value;
@@ -233,6 +341,9 @@ namespace MediviaWikiParser.Services
                 Console.WriteLine($"Failed to retrieve the image pf the {creature.Name}");
                 return;
             }
+#if DEBUG
+            Console.WriteLine($"Monsters: Saving creature image from {creature.Name}.");
+#endif
             using (Stream responseStream = await response.Content.ReadAsStreamAsync())
             {
                 using (FileStream fileStream = new FileStream(Path.Combine(_saveLocation,$"{creature.Name}.gif"), FileMode.Create, FileAccess.Write))

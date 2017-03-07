@@ -15,8 +15,9 @@ namespace MediviaWikiParser
         public static void Main(string[] args)
         {
             // GetMonsters().Wait(); 
-             GetSpells().Wait();
+            //GetSpells().Wait();
             //GetRunes().Wait();
+            GetItems().Wait();
             Console.ReadKey();
         }
 
@@ -65,7 +66,21 @@ namespace MediviaWikiParser
                 Console.WriteLine(ex.Message);
             }
         }
+        private static async Task GetItems()
+        {
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Items");
+            ItemsService itemsService = new ItemsService(saveLocation);
+            try
+            {
+                IEnumerable<Item> items = await itemsService.GetItems(false, true);
 
+                SaveJson(items, saveLocation, "items");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
         private static void SaveJson(object deserializedObject, string saveLocation, string fileName)
         {
 

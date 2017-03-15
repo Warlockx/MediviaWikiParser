@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -22,14 +23,19 @@ namespace MediviaWikiParser.Services
         {
             HttpResponseMessage response = await _httpClient.GetAsync("/Runes");
 
-            return !response.IsSuccessStatusCode ? null : await ParseRunes(response);
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Unexpected status code while getting runes in {nameof(GetRunes)}, statuscode: {response.StatusCode}");
+
+            string html = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrEmpty(html))
+                throw new InvalidDataException($"Empty html content while getting monsters in {nameof(GetRunes)}");
+
+            return ParseRunes(html);
         }
 
-        private static async Task<IEnumerable<Rune>> ParseRunes(HttpResponseMessage response)
+        private static IEnumerable<Rune> ParseRunes(string content)
         {
-            string content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(content)) return null;
-
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(content);
 

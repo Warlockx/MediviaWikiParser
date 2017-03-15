@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing.Text;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -26,14 +27,18 @@ namespace MediviaWikiParser.Services
         {
             HttpResponseMessage response = await _httpClient.GetAsync("/All Spells");
 
-            return  !response.IsSuccessStatusCode ? null : await ParseSpells(response);
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Unexpected status code while getting spells in {nameof(GetSpells)}, statuscode: {response.StatusCode}");
+
+            string html = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrEmpty(html))
+                throw new InvalidDataException($"Empty html content while getting monsters in {nameof(GetSpells)}");
+            return ParseSpells(html);
         }
 
-        private static async Task<IEnumerable<Spell>> ParseSpells(HttpResponseMessage response)
+        private static IEnumerable<Spell> ParseSpells(string content)
         {
-            string content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(content)) return null;
-
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(content);
 

@@ -13,18 +13,16 @@ namespace MediviaWikiParser
 {
     public class Program
     {
-        private static ILogger _logger = ApplicationLogging.CreateLogger<Program>();
+        private static readonly ILogger Logger = ApplicationLogging.CreateLogger<Program>();
         public static void Main(string[] args)
         {
            
-            ApplicationLogging.LoggerFactory.AddConsole().AddFile("Logs/MediviaWikiParser.txt");
+            ApplicationLogging.LoggerFactory.AddConsole().AddFile("Logs/MediviaWikiParser.txt",LogLevel.Debug);
 
             // GetMonsters().Wait(); 
             //GetSpells().Wait();
             //GetRunes().Wait();
-            //  GetItems().Wait();
-
-            _logger.LogInformation("safsafsaf");
+             GetItems().Wait();
             Console.ReadKey();
         }
 
@@ -39,7 +37,7 @@ namespace MediviaWikiParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+               Logger.LogError(ex.Message);
             }
 
         }
@@ -54,7 +52,7 @@ namespace MediviaWikiParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.LogError(ex.Message);
             }
 
         }
@@ -64,7 +62,7 @@ namespace MediviaWikiParser
             MonstersService monsters = new MonstersService(saveLocation);
             try
             {
-                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
+                IEnumerable<Monster> creatures = await monsters.GetMonsters(false, true);
 
                 SaveJson(creatures,saveLocation,"monsters");
             }
@@ -85,7 +83,7 @@ namespace MediviaWikiParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.LogError(ex.Message);
             }
         }
         private static void SaveJson(object deserializedObject, string saveLocation, string fileName)

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MediviaWikiParser.Models;
+using Microsoft.Extensions.Logging;
 
 namespace MediviaWikiParser.Services
 {
@@ -13,7 +15,7 @@ namespace MediviaWikiParser.Services
     {
         private readonly string _saveLocation;
         private readonly HttpClient _httpClient;
-       
+        private  readonly ILogger _logger = ApplicationLogging.CreateLogger<ItemsService>();
         public ItemsService(string saveLocation)
         {
             _httpClient = new HttpClient();
@@ -25,11 +27,13 @@ namespace MediviaWikiParser.Services
         {
             HttpResponseMessage response = await _httpClient.GetAsync("/Items");
 
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Unexpected status code while getting items in {nameof(GetItems)}, statuscode: {response.StatusCode}");
 
             string html = await response.Content.ReadAsStringAsync();
 
-            if (string.IsNullOrEmpty(html)) return null;
+            if (string.IsNullOrEmpty(html))
+                throw new InvalidDataException($"Empty html content while getting items in {nameof(GetItems)}");
 
 
             List<Item> items = new List<Item>();
@@ -40,7 +44,9 @@ namespace MediviaWikiParser.Services
 
             foreach (string itemCategory in itemCategories)
             {
-               items.AddRange(await GetCategoryItems(itemCategory)); 
+                IEnumerable<Item> categoryItems = await GetCategoryItems(itemCategory);
+                if (categoryItems != null)
+                    items.AddRange(categoryItems); 
             }
 
             if (getDetails)
@@ -61,11 +67,14 @@ namespace MediviaWikiParser.Services
         {
             HttpResponseMessage response = _httpClient.GetAsync($"/{item.Name}").Result;
 
-            if (!response.IsSuccessStatusCode) return;
+
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Unexpected status code while getting items in {nameof(GetItemDetailedInfo)}, statuscode: {response.StatusCode}");
 
             string html = response.Content.ReadAsStringAsync().Result;
 
-            if (string.IsNullOrEmpty(html)) return;
+            if (string.IsNullOrEmpty(html))
+                throw new InvalidDataException($"Empty html content while getting items in {nameof(GetItemDetailedInfo)}");
 
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(html);
@@ -82,18 +91,19 @@ namespace MediviaWikiParser.Services
         {
             HttpResponseMessage response = await _httpClient.GetAsync(itemCategory);
 
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode) 
+                throw new HttpRequestException($"Unexpected status code while getting items in {nameof(GetCategoryItems)}, statuscode: {response.StatusCode}");
 
             string html = await response.Content.ReadAsStringAsync();
 
-            if (string.IsNullOrEmpty(html)) return null;
+            if (string.IsNullOrEmpty(html)) 
+                throw new InvalidDataException($"Empty html content while getting items in {nameof(GetCategoryItems)}");
           
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(html);
 
-#if DEBUG
-            Console.WriteLine("Parsing item category: {");
-#endif
+            _logger.LogInformation($"Parsing item category: {itemCategory}");
+
             HtmlNodeCollection tables = document.DocumentNode.SelectNodes("//table[@class='wiki_table']");
 
             return tables != null ? ParseRows(tables) : null;

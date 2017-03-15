@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MediviaWikiParser.Models;
+using Microsoft.Extensions.Logging;
 
 namespace MediviaWikiParser.Services
 {
@@ -20,7 +21,7 @@ namespace MediviaWikiParser.Services
     {
         private readonly string _saveLocation;
         private readonly HttpClient _httpClient;
-
+        private readonly ILogger _logger = ApplicationLogging.CreateLogger<MonstersService>();
         public MonstersService(string saveLocation)
         {
             _httpClient = new HttpClient();
@@ -34,19 +35,22 @@ namespace MediviaWikiParser.Services
             List<Monster> creatures = new List<Monster>();
             HttpResponseMessage response = await _httpClient.GetAsync("/Monsters");
 
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Unexpected status code while getting monsters in {nameof(GetMonsters)}, statuscode: {response.StatusCode}");
 
             string html = await response.Content.ReadAsStringAsync();
 
-            if (string.IsNullOrEmpty(html)) return null;
+            if (string.IsNullOrEmpty(html))
+                throw new InvalidDataException($"Empty html content while getting monsters in {nameof(GetMonsters)}");
+
 
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(html);
 
             HtmlNodeCollection creatureRows = document.DocumentNode.SelectNodes("//table[@class='wiki_table']/tr");
-#if DEBUG
-            Console.WriteLine("Monsters: Getting simple info.");
-#endif
+
+            _logger.LogInformation("Monsters: Getting simple info.");
+
             GetSimpleInfo(ref creatures,creatureRows);
 
             if (getDetails)
@@ -68,17 +72,21 @@ namespace MediviaWikiParser.Services
             List<Monster> creatures = new List<Monster>(oldCreatures);
             for (int i = 0; i < creatures.Count; i++)
             {
-#if DEBUG
-                Console.WriteLine($"Monsters: Getting detailed info from creature {i}/{creatures.Count-1}.");
-#endif
+
+                _logger.LogInformation($"Monsters: Getting detailed info from creature {i}/{creatures.Count-1}.");
+
                 Monster creature = creatures[i];
                 HttpResponseMessage response = await _httpClient.GetAsync($"/{creature.Name}");
 
-                if (!response.IsSuccessStatusCode) continue;
+
+                if (!response.IsSuccessStatusCode)
+                    throw new HttpRequestException($"Unexpected status code while getting monsters in {nameof(GetDetailedInfo)}, statuscode: {response.StatusCode}");
 
                 string html = await response.Content.ReadAsStringAsync();
 
-                if (string.IsNullOrEmpty(html)) continue;
+                if (string.IsNullOrEmpty(html))
+                    throw new InvalidDataException($"Empty html content while getting monsters in {nameof(GetDetailedInfo)}");
+
 
                 creatures[i] = ParseDetailPage(creature, html);
             }
@@ -337,13 +345,10 @@ namespace MediviaWikiParser.Services
             HttpResponseMessage response = await _httpClient.GetAsync(creature.ImageUrl);
 
             if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Failed to retrieve the image pf the {creature.Name}");
-                return;
-            }
-#if DEBUG
-            Console.WriteLine($"Monsters: Saving creature image from {creature.Name}.");
-#endif
+                throw new HttpRequestException($"Unexpected status code while getting the image of {creature.Name} in {nameof(SaveImage)}, statuscode: {response.StatusCode}");
+
+            _logger.LogInformation($"Monsters: Saving creature image from {creature.Name}.");
+
             using (Stream responseStream = await response.Content.ReadAsStreamAsync())
             {
                 using (FileStream fileStream = new FileStream(Path.Combine(_saveLocation,$"{creature.Name}.gif"), FileMode.Create, FileAccess.Write))

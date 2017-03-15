@@ -5,19 +5,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediviaWikiParser.Models;
 using MediviaWikiParser.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace MediviaWikiParser
 {
     public class Program
     {
-
+        private static ILogger _logger = ApplicationLogging.CreateLogger<Program>();
         public static void Main(string[] args)
         {
+           
+            ApplicationLogging.LoggerFactory.AddConsole();
+
             // GetMonsters().Wait(); 
             //GetSpells().Wait();
             //GetRunes().Wait();
-            GetItems().Wait();
+            //  GetItems().Wait();
+
+            _logger.LogInformation("safsafsaf");
             Console.ReadKey();
         }
 

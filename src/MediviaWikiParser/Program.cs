@@ -5,18 +5,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediviaWikiParser.Models;
 using MediviaWikiParser.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace MediviaWikiParser
 {
     public class Program
     {
-
+        private static ILogger _logger = ApplicationLogging.CreateLogger<Program>();
         public static void Main(string[] args)
         {
-             GetMonsters().Wait(); 
-            // GetSpells().Wait();
+           
+            ApplicationLogging.LoggerFactory.AddConsole().AddFile("Logs/MediviaWikiParser.txt");
+
+            // GetMonsters().Wait(); 
+            //GetSpells().Wait();
             //GetRunes().Wait();
+            //  GetItems().Wait();
+
+            _logger.LogInformation("safsafsaf");
             Console.ReadKey();
         }
 
@@ -56,7 +64,7 @@ namespace MediviaWikiParser
             MonstersService monsters = new MonstersService(saveLocation);
             try
             {
-                IEnumerable<Monster> creatures = await monsters.GetMonsters(false, true);
+                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
 
                 SaveJson(creatures,saveLocation,"monsters");
             }
@@ -65,7 +73,21 @@ namespace MediviaWikiParser
                 Console.WriteLine(ex.Message);
             }
         }
+        private static async Task GetItems()
+        {
+            string saveLocation = Path.Combine(Directory.GetCurrentDirectory(), "Items");
+            ItemsService itemsService = new ItemsService(saveLocation);
+            try
+            {
+                IEnumerable<Item> items = await itemsService.GetItems(false, true);
 
+                SaveJson(items, saveLocation, "items");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
         private static void SaveJson(object deserializedObject, string saveLocation, string fileName)
         {
 

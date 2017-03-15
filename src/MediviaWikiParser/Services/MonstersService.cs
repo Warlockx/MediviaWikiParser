@@ -29,9 +29,9 @@ namespace MediviaWikiParser.Services
         }
 
      
-        public async Task<IEnumerable<Creature>> GetMonsters(bool savePictures,bool getDetails)
+        public async Task<IEnumerable<Monster>> GetMonsters(bool savePictures,bool getDetails)
         {
-            List<Creature> creatures = new List<Creature>();
+            List<Monster> creatures = new List<Monster>();
             HttpResponseMessage response = await _httpClient.GetAsync("/Monsters");
 
             if (!response.IsSuccessStatusCode) return null;
@@ -57,21 +57,21 @@ namespace MediviaWikiParser.Services
             if (!Directory.Exists(_saveLocation))
                 Directory.CreateDirectory(_saveLocation);
 
-            foreach (Creature creature in creatures)
+            foreach (Monster creature in creatures)
                 await SaveImage(creature);
 
             return creatures;
         }
 
-        private async Task<IEnumerable<Creature>> GetDetailedInfo(IEnumerable<Creature> oldCreatures)
+        private async Task<IEnumerable<Monster>> GetDetailedInfo(IEnumerable<Monster> oldCreatures)
         {
-            List<Creature> creatures = new List<Creature>(oldCreatures);
+            List<Monster> creatures = new List<Monster>(oldCreatures);
             for (int i = 0; i < creatures.Count; i++)
             {
 #if DEBUG
                 Console.WriteLine($"Monsters: Getting detailed info from creature {i}/{creatures.Count-1}.");
 #endif
-                Creature creature = creatures[i];
+                Monster creature = creatures[i];
                 HttpResponseMessage response = await _httpClient.GetAsync($"/{creature.Name}");
 
                 if (!response.IsSuccessStatusCode) continue;
@@ -85,19 +85,19 @@ namespace MediviaWikiParser.Services
             return creatures;
         }
 
-        private static void GetSimpleInfo(ref List<Creature> creatures,HtmlNodeCollection creatureRows)
+        private static void GetSimpleInfo(ref List<Monster> creatures,HtmlNodeCollection creatureRows)
         {
             foreach (HtmlNode creatureNode in creatureRows)
             {
                 if (creatureNode.InnerHtml.Contains("Experience")) continue;
 
-                Creature monster = ParseRow(creatureNode);
+                Monster monster = ParseRow(creatureNode);
                 if (monster != null)
                     creatures.Add(monster);
             }
         }
 
-        private static Creature ParseRow(HtmlNode node)
+        private static Monster ParseRow(HtmlNode node)
         {
             HtmlNodeCollection creatureCells = node.SelectNodes("td");
             if (creatureCells.Count < 7) return null;
@@ -116,10 +116,10 @@ namespace MediviaWikiParser.Services
             int creatureHitpoints;
             int.TryParse(creatureCells[3].InnerText, out creatureHitpoints);
             
-           return new Creature(pictureUrl,creatureName,creatureExperience,creatureHitpoints);
+           return new Monster(pictureUrl,creatureName,creatureExperience,creatureHitpoints);
         }
 
-        private static Creature ParseDetailPage(Creature creature, string html)
+        private static Monster ParseDetailPage(Monster creature, string html)
         {
 
             HtmlDocument document = new HtmlDocument();
@@ -129,13 +129,13 @@ namespace MediviaWikiParser.Services
             string[] information = informationContainer.InnerText.Split('\n');
 
             Tuple<int, int> summonInfo = ParseSummonInfo(information.FirstOrDefault(s => s.Contains("Summon/Convince")));
-            IEnumerable<Ability> abilities = ParseAbilities(information.FirstOrDefault(s => s.Contains("Abilities")));
+            IEnumerable<MonsterAbility> abilities = ParseAbilities(information.FirstOrDefault(s => s.Contains("Abilities")));
             bool? pushable = information.FirstOrDefault(s => s.Contains("Pushable"))?.Contains("Tick.jpg");
             bool? pushObjects = information.FirstOrDefault(s => s.Contains("Push Objects"))?.Contains("Tick.jpg");
             IEnumerable<Element> walksOn = ParseWalksOn(information.FirstOrDefault(s => s.Contains("Walks around")));
             int damagePerTurn = ParseDamage(information.FirstOrDefault(s => s.Contains("Est. Max. Damage")));
-            IEnumerable<DamageType> immunities = ParseDamageTypes(information.FirstOrDefault(s => s.Contains("Immune")));
-            IEnumerable<DamageType> neutralities =
+            IEnumerable<DamageElement> immunities = ParseDamageTypes(information.FirstOrDefault(s => s.Contains("Immune")));
+            IEnumerable<DamageElement> neutralities =
                 ParseDamageTypes(information.FirstOrDefault(s => s.Contains("Neutral")));
             IEnumerable<string> sounds = ParseSounds(information.FirstOrDefault(s => s.Contains("Sounds")));
             string strategy = ParseSimpleField(information.FirstOrDefault(s => s.Contains("Strategy")));
@@ -243,22 +243,22 @@ namespace MediviaWikiParser.Services
             return sounds;
         }
 
-        private static IEnumerable<DamageType> ParseDamageTypes(string damageTypesString)
+        private static IEnumerable<DamageElement> ParseDamageTypes(string damageTypesString)
         {
             if (string.IsNullOrEmpty(damageTypesString) || damageTypesString.Contains("None")) return null;
             return damageTypesString.Substring(damageTypesString.IndexOf(':') + 1)
                                     .TrimStart()
                                     .Split(',')
-                                    .Select(immunityString => immunityString.GetEnum<DamageType>())
+                                    .Select(immunityString => immunityString.GetEnum<DamageElement>())
                                     .Where(damageType => damageType != null)
-                                    .Cast<DamageType>()
+                                    .Cast<DamageElement>()
                                     .ToList();
         }
 
-        private static IEnumerable<Ability> ParseAbilities(string abilityNode)
+        private static IEnumerable<MonsterAbility> ParseAbilities(string abilityNode)
         {
             if (string.IsNullOrEmpty(abilityNode) || abilityNode.Contains("None")) return null;
-            List<Ability> abilityList = new List<Ability>();
+            List<MonsterAbility> abilityList = new List<MonsterAbility>();
             abilityNode = abilityNode.Substring(abilityNode.IndexOf(':') + 1)
                                      .Replace(".", "")
                                      .Replace(":", "");
@@ -271,7 +271,7 @@ namespace MediviaWikiParser.Services
 
                 string ability = abilityString.Trim();
                 if (!ability.Contains('-'))
-                    abilityList.Add(new Ability(ability));
+                    abilityList.Add(new MonsterAbility(ability));
                 else
                 {
                     string[] abilityWithRange = ability
@@ -280,7 +280,7 @@ namespace MediviaWikiParser.Services
 
                     if (abilityWithRange.Length < 3)
                     {
-                        abilityList.Add(new Ability(ability));
+                        abilityList.Add(new MonsterAbility(ability));
                         continue;
                     }
                     int minRange;
@@ -288,7 +288,7 @@ namespace MediviaWikiParser.Services
                     int.TryParse(abilityWithRange[1], out minRange);
                     int.TryParse(abilityWithRange[2], out maxRange);
                     
-                    abilityList.Add(new Ability(abilityWithRange[0], minRange, maxRange));
+                    abilityList.Add(new MonsterAbility(abilityWithRange[0], minRange, maxRange));
                 }
             }
             return abilityList;
@@ -332,7 +332,7 @@ namespace MediviaWikiParser.Services
             return value;
         }
 
-        private async Task SaveImage(Creature creature)
+        private async Task SaveImage(Monster creature)
         {
             HttpResponseMessage response = await _httpClient.GetAsync(creature.ImageUrl);
 

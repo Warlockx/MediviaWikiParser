@@ -5,20 +5,20 @@ using System.Threading.Tasks;
 
 namespace MediviaWikiParser.Models
 {
-    public class Ability
+    public class MonsterAbility
     {
         public string Name { get; }
         public int MinRange { get; }
         public int MaxRange { get; }
 
-        public Ability(string name, int minRange, int maxRange)
+        public MonsterAbility(string name, int minRange, int maxRange)
         {
             Name = name;
             MinRange = minRange;
             MaxRange = maxRange;
         }
 
-        public Ability(string name)
+        public MonsterAbility(string name)
         {
             Name = name;
         }

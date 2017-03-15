@@ -2890,7 +2890,7 @@
     ],
     "Notes": null,
     "WhereToFind": [
-      "North-West of Orc Fort <!-- ws:start:WikiTextMediaRule:0:&lt;img src=&quot;http://www.wikispaces.com/site/embedthumbnail/custom/26854152?h=0&amp;w=0&quot; class=&quot;WikiMedia WikiMediaCustom&quot; id=&quot;wikitext@@media@@type=&amp;quot;custom&amp;quot; key=&amp;quot;26854152&amp;quot;&quot; title=&quot;Custom Media&quot;/&gt; -->here<!-- ws:end:WikiTextMediaRule:0 --> . (It's been reported that the spawn is missing. Apparently it's due to the new houses added to the area.)"
+      "North-West of Orc Fort <!-- ws:start:WikiTextMediaRule:0:&lt;img src=&quot;https://www.wikispaces.com/site/embedthumbnail/custom/26854152?h=0&amp;w=0&quot; class=&quot;WikiMedia WikiMediaCustom&quot; id=&quot;wikitext@@media@@type=&amp;quot;custom&amp;quot; key=&amp;quot;26854152&amp;quot;&quot; title=&quot;Custom Media&quot;/&gt; -->here<!-- ws:end:WikiTextMediaRule:0 --> . (It's been reported that the spawn is missing. Apparently it's due to the new houses added to the area.)"
     ],
     "Strategy": "Similar to a Wild Warrior, except with more health. Most players shouldn't have a problem with them.",
     "Loot": [
@@ -12235,7 +12235,7 @@
     "Pushable": false,
     "CanPushObjects": true,
     "CanWalkOn": [
-      "Fire"
+      "Energy"
     ],
     "Immunities": [
       "Invisibility",

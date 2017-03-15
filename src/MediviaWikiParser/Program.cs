@@ -14,8 +14,8 @@ namespace MediviaWikiParser
 
         public static void Main(string[] args)
         {
-            // GetMonsters().Wait(); 
-             GetSpells().Wait();
+             GetMonsters().Wait(); 
+            // GetSpells().Wait();
             //GetRunes().Wait();
             Console.ReadKey();
         }
@@ -56,7 +56,7 @@ namespace MediviaWikiParser
             MonstersService monsters = new MonstersService(saveLocation);
             try
             {
-                IEnumerable<Creature> creatures = await monsters.GetMonsters(false, true);
+                IEnumerable<Monster> creatures = await monsters.GetMonsters(false, true);
 
                 SaveJson(creatures,saveLocation,"monsters");
             }

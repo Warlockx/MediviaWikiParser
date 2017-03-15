@@ -8,7 +8,7 @@ using Newtonsoft.Json.Converters;
 namespace MediviaWikiParser.Models
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum DamageType
+    public enum DamageElement
     {
         Fire,
         Energy,

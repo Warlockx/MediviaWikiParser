@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MediviaWikiParser.Models;
@@ -54,7 +55,7 @@ namespace MediviaWikiParser.Services
 
             if (savePictures)
                 items.ForEach(SavePictures(_saveLocation));
-
+            
             return items;
         }
 
@@ -65,11 +66,16 @@ namespace MediviaWikiParser.Services
 
         private void GetItemDetailedInfo(ref Item item)
         {
-            HttpResponseMessage response = _httpClient.GetAsync($"/{item.Name}").Result;
+            if (item.Name == "Life Fluid")
+                Console.WriteLine();
 
+            if (string.IsNullOrEmpty(item.ItemLink))
+                return;
+
+            HttpResponseMessage response = _httpClient.GetAsync(item.ItemLink).Result;
 
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"Unexpected status code while getting items in {nameof(GetItemDetailedInfo)}, statuscode: {response.StatusCode}");
+              return;
 
             string html = response.Content.ReadAsStringAsync().Result;
 
@@ -81,10 +87,37 @@ namespace MediviaWikiParser.Services
 
             HtmlNodeCollection infoNodes = document.DocumentNode.SelectNodes("//table[@class='wiki_table']/tr");
 
-            if (infoNodes.Count >= 5)
+            HtmlNodeCollection lootValueNodes = infoNodes?.FirstOrDefault(n => n.InnerText.ToLower().Contains("loot value"))?.SelectNodes("td");
+            if (lootValueNodes != null && lootValueNodes.Count > 1)
             {
-               
+                GetLootValue(item, lootValueNodes);
+
+                _logger.LogInformation($"Tried to get the lootvalue wiki string: {lootValueNodes[1]?.InnerText} " +
+                                       $"current item information: " +
+                                       $"\n Name: {item.Name} \n LootValue: {item.LootValue}");
             }
+        }
+
+        private void GetLootValue(Item item, HtmlNodeCollection lootValueNode)
+        {
+            string[] splitRange = lootValueNode[1].InnerText.Split(new[] {"-", "/"},
+                StringSplitOptions.RemoveEmptyEntries).Select(s=> s.Replace(".","").Replace(",","")).ToArray();
+
+            int[] lootValueRange = new int[splitRange.Length];
+            for (int i = 0; i < splitRange.Length; i++)
+            {
+                Match cleanNumbers = Regex.Match(splitRange[i], @"\d+");
+                if (!cleanNumbers.Success)
+                    continue;
+
+                int.TryParse(cleanNumbers.Value, out lootValueRange[i]);
+
+                if (Regex.Match(splitRange[i], @"(\d[k]{2}\s)").Success)
+                    lootValueRange[i] = lootValueRange[i] * 1000000;
+                else if (Regex.Match(splitRange[i], @"(\d[k]{1}\s)").Success)
+                    lootValueRange[i] = lootValueRange[i] * 1000;
+            }
+            item.LootValue = (int)lootValueRange.Average();
         }
 
         private async Task<IEnumerable<Item>> GetCategoryItems(string itemCategory)
@@ -136,9 +169,6 @@ namespace MediviaWikiParser.Services
 
         private static Item ParseItemInformation(HtmlNodeCollection itemCells, List<string> tableHeaders)
         {
-            if (itemCells[0].InnerText.StartsWith("Picture") || itemCells[0].InnerText.Contains("Bone Key"))
-                return null;
-
             Item item = new Item();
 
             foreach (string header in tableHeaders)
@@ -149,7 +179,7 @@ namespace MediviaWikiParser.Services
                         GetImageUrl(itemCells, tableHeaders, item);
                         break;
                     case "Name":
-                        item.Name = itemCells[tableHeaders.IndexOf("Name")].InnerText.TrimEnd('\n');
+                        GetName(itemCells, tableHeaders, item);
                         break;
                     case "Arm":
                     case "Armor":
@@ -169,16 +199,14 @@ namespace MediviaWikiParser.Services
                         item.TwoHanded = itemCells[tableHeaders.IndexOf("Hands")].InnerText.StartsWith("one");
                         break;
                     case "Hit% +":
+                    case "Hit%+":
                         GetAdditionalHitChance(itemCells, tableHeaders, item);
                         break;
                     case "Attributes":
-                        item.Attributes = itemCells[tableHeaders.IndexOf("Attributes")].InnerText.Replace('\n',',');
+                        item.Attributes = itemCells[tableHeaders.IndexOf("Attributes")].InnerText.Replace('\n',',').Replace(".,",".");
                         break;
                     case "Number":
                         item.Name = itemCells[tableHeaders.IndexOf("Number")].InnerText;
-                        break;
-                    case "Location":
-                        item.LootFrom = new[] { itemCells[tableHeaders.IndexOf("Location")].InnerText };
                         break;
                     case "Price":
                             GetItemvalue(itemCells, tableHeaders, item);
@@ -188,6 +216,13 @@ namespace MediviaWikiParser.Services
                 }
             }
             return item;
+        }
+
+        private static void GetName(HtmlNodeCollection itemCells, List<string> tableHeaders, Item item)
+        {
+            HtmlNode nameNode = itemCells[tableHeaders.IndexOf("Name")];
+            item.Name = nameNode.InnerText.TrimStart(' ').TrimEnd('\n');
+            item.ItemLink = nameNode.ChildNodes[0].GetAttributeValue("href", "");
         }
 
         private static void GetItemvalue(HtmlNodeCollection itemCells, List<string> tableHeaders, Item item)

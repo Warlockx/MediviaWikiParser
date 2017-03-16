@@ -10,6 +10,8 @@ namespace MediviaWikiParser.Models
     {
         [JsonIgnore]
         public string ImageUrl { get; set; }
+        [JsonIgnore]
+        public string ItemLink { get; set; }
 
         public string  Name { get; set; }
         public int Armour { get; set; }
@@ -20,9 +22,5 @@ namespace MediviaWikiParser.Models
         public int Defence { get; set; }
         public float Weight { get; set; }
         public int LootValue { get; set; }
-        public IEnumerable<string> LootFrom { get; set; }
-        public IEnumerable<string> BuyFrom { get; set; }
-        public IEnumerable<string> SellTo { get; set; }
-       
     }
 }

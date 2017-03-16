@@ -242,3 +242,4 @@ ModelManifest.xml
 .fake/
 /src/MediviaWikiParser/Images
 /src/MediviaWikiParser/Logs/MediviaWikiParser-20170315.txt
+/src/MediviaWikiParser/Items/items.json

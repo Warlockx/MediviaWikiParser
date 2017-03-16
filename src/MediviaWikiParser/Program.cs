@@ -17,7 +17,7 @@ namespace MediviaWikiParser
         public static void Main(string[] args)
         {
            
-            ApplicationLogging.LoggerFactory.AddConsole().AddFile("Logs/MediviaWikiParser.txt",LogLevel.Debug);
+            ApplicationLogging.LoggerFactory.AddConsole().AddFile("Logs/MediviaWikiParser.txt",LogLevel.Error);
 
             // GetMonsters().Wait(); 
             //GetSpells().Wait();
